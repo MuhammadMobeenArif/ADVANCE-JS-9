@@ -88,22 +88,30 @@ products.forEach(product => {
 
 //Task no 2
 
-var availableColors = products
-  .filter(product => product.isActive)
-  .flatMap(product => 
+const availableColors = products
+  .filter(product => product.isActive) // Filter active products
+  .map(product =>
     product.variations
-      .filter(variation => variation.isAvailable)
-      .map(variation => variation.color)
-  );
-console.log("Available Colors for Active Products:", availableColors);
+      .filter(variation => variation.isAvailable) // Filter available variations
+      .map(variation => variation.color) // Extract color
+  )
+  .reduce((acc, colors) => acc.concat(colors), []); // Flatten the array
+
+console.log(availableColors);
+
 
 //Task no 3
 
-var totalAvailableQuantity = products
-  .flatMap(product => product.variations)
-  .filter(variation => variation.isAvailable)
-  .reduce((sum, variation) => sum + variation.quantity, 0);
-console.log("Total Available Quantity:", totalAvailableQuantity);
+const totalAvailableQuantity = products
+  .map(product => {
+    return product.variations
+      .filter(variation => variation.isAvailable)     
+      .map(variation => variation.quantity)          
+      .reduce((sum, qty) => sum + qty, 0);            
+  })
+  .reduce((total, qty) => total + qty, 0);            
+console.log(totalAvailableQuantity);
+
 
 //Task no 4
 
@@ -136,41 +144,46 @@ productEffectivePrices.forEach(({ productName, variations }) => {
 });
 
 //Task no 6
+let highestDiscountVariation = null;
 
-var allVariations = products.flatMap(product => 
-  product.variations.map(variation => ({
-    ...variation,
-    productName: product.name
-  }))
-);
-var highestDiscountVariation = allVariations.reduce((max, current) =>
-  current.discount > max.discount ? current : max
-);
-console.log("Variation with the Highest Discount:");
-console.log(`Product: ${highestDiscountVariation.productName}`);
-console.log(`Color: ${highestDiscountVariation.color}`);
-console.log(`Original Price: ${highestDiscountVariation.price}`);
-console.log(`Discount: ${highestDiscountVariation.discount}%`);
-console.log(`Effective Price: ${highestDiscountVariation.price * (1 - highestDiscountVariation.discount / 100)}`);
+products.forEach(product => {
+  product.variations.forEach(variation => {
+    if (
+      !highestDiscountVariation ||
+      variation.discount > highestDiscountVariation.discount
+    ) {
+      highestDiscountVariation = variation;
+    }
+  });
+});
+
+console.log(highestDiscountVariation);
 
 //Task no 7
 
 var emails = products
-  .flatMap(product => product.reviews)
-  .filter(review => review.approved && review.likes > 3)
-  .map(review => review.user.email);
+  const emails = products
+  .map(product => {
+    return product.reviews
+      .filter(review => review.approved && review.likes > 3) 
+      .map(review => review.user.email);                    
+  })
+  .reduce((acc, emails) => acc.concat(emails), []);        
 
-console.log("Emails of users with approved reviews and more than 3 likes:");
 console.log(emails);
+
 
 //Task no 8
 
-var verifiedPurchaseCount = products
-  .flatMap(product => product.reviews)
-  .filter(review => review.verifiedPurchase)
-  .length;
+const verifiedReviewCount = products
+  .map(product => {
+    return product.reviews
+      .filter(review => review.verifiedPurchase)  
+      .length;                               
+  })
+  .reduce((total, count) => total + count, 0);   
 
-console.log("Number of Verified Purchase Reviews:", verifiedPurchaseCount);
+console.log(verifiedReviewCount);
 
 //Task no 9
 
